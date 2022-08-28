@@ -1,0 +1,7 @@
+example/**
+!example/logs/
+!example/logs/.gitkeep
+!example/nginx.conf
+!example/hot.lua
+!example/resty_inspect_hooks1.lua
+!example/resty_inspect_hooks2.lua
