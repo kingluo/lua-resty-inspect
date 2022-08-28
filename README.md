@@ -6,7 +6,7 @@ e.g. print local variables if some condition satisfied.
 In this way, you don't need to modify the source codes of your project, and just get diagnose infomation
 on demand, i.e. dynamic logging.
 
-This library supports setting breakpints in both interpretd function and jit compiled function.
+This library supports setting breakpints within both interpretd function and jit compiled function.
 
 ## API
 
@@ -43,6 +43,19 @@ to configure breakpionts on-fly. Delete that file would unset all breakpints. It
 ### require("resty.inspect").destroy()
 
 Destroy the monitor timer.
+
+## Caveats
+
+To setup breakpoint within jit compiled function, it needs to flush the jit cache first.
+
+Depending on the scope of jit cache flush, if you only flush the specific function cache, then it only
+slows down that function execution, otherwise, it would slow down the whole jit cache of lua vm.
+
+When the breakpoints are enabled, the lua vm could not trace new hot paths and compile them.
+
+But when the breakpoints disappear, the lua vm would recover jit process.
+
+So this library is only useful for functional debug without stress.
 
 ## Example
 
