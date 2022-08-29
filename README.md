@@ -1,12 +1,13 @@
 # lua-resty-inspect
 
-It's useful to set arbitrary breakpoint in specific lua file to inspect related infomation,
+It's useful to set arbitrary breakpoint in any lua file to inspect the context infomation,
 e.g. print local variables if some condition satisfied.
 
 In this way, you don't need to modify the source codes of your project, and just get diagnose infomation
 on demand, i.e. dynamic logging.
 
-This library supports setting breakpints within both interpretd function and jit compiled function.
+This library supports setting breakpoints within both interpretd function and jit compiled function.
+The breakpoint could be at any position within the function. The function could be global/local/module/ananymous.
 
 ## API
 
@@ -14,12 +15,12 @@ This library supports setting breakpints within both interpretd function and jit
 
 The breakpoint is specified by `file` (full qualified or short file name) and the `line` number.
 
-The `func` determine the function of jit cache to flush:
-* If the breakpint is related to a module function or
+The `func` specified the scope (which function or global) of jit cache to flush:
+* If the breakpoint is related to a module function or
 global function, you should set it that function reference, then only the jit cache of that function would
-be flushed, and then it would not affect other caches, which would not slow down other parts of the program.
-* If the breakpint breaks on local function or anonymous function,
-then you have to set it to `nil`, which would flush the whole jit cache of lua vm.
+be flushed, and it would not affect other caches to avoid slowing down other parts of the program.
+* If the breakpointis related to local function or anonymous function,
+then you have to set it to `nil` (because no way to get function reference), which would flush the whole jit cache of lua vm.
 
 You attach a `filter_func` function of the breakpoint, the function takes the `info` as argument and returns
 true of false to determine whether the breakpoint would be removed. You could setup one-shot breakpoint
@@ -27,18 +28,18 @@ at ease.
 
 The `info` is a hash table which contains below keys:
 
-* finfo: `debug.getinfo(level, "nSlf")`
-* uv: upvalues hash table
-* vals: local variables hash table
+* `finfo`: `debug.getinfo(level, "nSlf")`
+* `uv`: upvalues hash table
+* `vals`: local variables hash table
 
 ### require("resty.inspect.dbg").unset_hook(file, line)
 
-unset the specific breakpint.
+remove the specific breakpoint.
 
 ### require("resty.inspect").init(delay, file)
 
-Setup a timer (in `delay` interval second) to monitor specific `file` to setup the needed breakpints. You could modify that file
-to configure breakpionts on-fly. Delete that file would unset all breakpints. It's recommanded to use soft link file trick.
+Setup a timer (in `delay` interval, in seconds) to monitor specific `file` to setup the needed breakpoints. You could modify that file
+to configure breakpoints on-the-fly. Delete that file would unset all breakpoints. It's recommanded to use soft link file trick.
 
 ### require("resty.inspect").destroy()
 
@@ -53,7 +54,7 @@ slows down that function execution, otherwise, it would slow down the whole jit 
 
 When the breakpoints are enabled, the lua vm could not trace new hot paths and compile them.
 
-But when the breakpoints disappear, the lua vm would recover jit process.
+But when the breakpoints disappear, the lua vm would recover jit tracing.
 
 So this library is only useful for functional debug without stress.
 
@@ -173,9 +174,9 @@ cd /opt/lua-resty-inspect
 **Nginx log output explanation:**
 
 ```bash
-### no breakpoints initially, because the breakpints file resty_inspect_hooks.lua not exist
+### no breakpoints initially, because the breakpoints file resty_inspect_hooks.lua not exist
 
-### setup foo breakpint
+### setup foo breakpoint
 
 ln -sf /opt/lua-resty-inspect/example/resty_inspect_hooks1.lua /opt/lua-resty-inspect/example/resty_inspect_hooks.lua
 
@@ -185,8 +186,8 @@ ln -sf /opt/lua-resty-inspect/example/resty_inspect_hooks1.lua /opt/lua-resty-in
 
 curl localhost:10000/get
 
-### breakpint on foo() function triggered
-### print related infomation around the breakpint
+### breakpoint on foo() function triggered
+### print related infomation around the breakpoint
 
 2022/08/28 21:44:28 [info] 2688226#2688226: *47 [lua] resty_inspect_hooks.lua:9: foo traceback
 stack traceback:
@@ -200,7 +201,7 @@ stack traceback:
 2022/08/28 21:44:28 [info] 2688226#2688226: *47 [lua] resty_inspect_hooks.lua:12: {"s":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaall"}, client: 127.0.0.1, server: , request: "GET /get HTTP/1.1", host: "localhost:10000"
 
 
-### the breakpint only affect the jit cache of foo, so you could see that the foo execution is slow,
+### the breakpoint only affect the jit cache of foo, so you could see that the foo execution is slow,
 ### but the bar function is still fast
 
 2022/08/28 21:44:28 [info] 2688226#2688226: *47 [lua] hot.lua:26: timeit(): timeit foo: 81.11 msecs, client: 127.0.0.1, server: , request: "GET /get HTTP/1.1", host: "l
@@ -236,7 +237,7 @@ ln -sf /opt/lua-resty-inspect/example/resty_inspect_hooks2.lua /opt/lua-resty-in
 2022/08/28 21:44:49 [info] 2688226#2688226: *69 [lua] init.lua:29: setup_hooks(): set hooks: err=nil, hooks=["hot.lua#9","example\/hot.lua#17"], context: ngx.timer
 
 ##
-## The bar breakpint clears the whole jit cache, so you could see that it slows down everything
+## The bar breakpoint clears the whole jit cache, so you could see that it slows down everything
 ##
 
 2022/08/28 21:45:03 [info] 2688226#2688226: *84 [lua] resty_inspect_hooks.lua:9: foo traceback
