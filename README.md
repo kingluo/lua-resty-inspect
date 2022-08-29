@@ -274,4 +274,10 @@ calhost:10000"
 calhost:10000"
 2022/08/28 21:45:08 [info] 2688226#2688226: *89 [lua] init.lua:57: alive hooks: {}, context: ngx.timer
 
+##
+## remove hooks
+##
+
+rm -f /opt/lua-resty-inspect/example/resty_inspect_hooks.lua
+
 ```
