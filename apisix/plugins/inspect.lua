@@ -15,6 +15,7 @@
 -- limitations under the License.
 --
 local core = require("apisix.core")
+local plugin = require("apisix.plugin")
 local inspect = require("resty.inspect")
 
 
@@ -41,7 +42,15 @@ end
 
 
 function _M.init()
-    return inspect.init()
+    local attr = plugin.plugin_attr(plugin_name)
+    local delay
+    local hooks_file
+    if attr then
+        delay = attr.delay
+        hooks_file = attr.hooks_file
+    end
+    ngx.log(ngx.INFO, "delay=", delay, ", hooks_file=", hooks_file)
+    return inspect.init(delay, hooks_file)
 end
 
 

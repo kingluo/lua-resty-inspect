@@ -124,5 +124,5 @@ plugins:                          # plugin list (sorted by priority)
 
 plugin_attr:
   inspect:
-    delay: 5
-    hooks_file: ""
+    delay: 3
+    hooks_file: "/var/run/resty_inspect_hooks.lua"
