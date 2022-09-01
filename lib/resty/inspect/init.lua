@@ -12,6 +12,8 @@ local running = false
 
 local last_report_time = 0
 
+local REPORT_INTERVAL = 30 -- secs
+
 local function is_file_exists(file)
    local f = io.open(file, "r")
    if f then io.close(f) return true else return false end
@@ -49,7 +51,7 @@ local function reload_hooks(premature, delay, file)
         last_modified = time
     else
         local ts = os.time()
-        if ts - last_report_time >= 5 then
+        if ts - last_report_time >= REPORT_INTERVAL then
             local hooks = {}
             for _, hook in ipairs(dbg.hooks()) do
                 table.insert(hooks, hook.key)
