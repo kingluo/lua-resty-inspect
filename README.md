@@ -9,6 +9,16 @@ on demand, i.e. dynamic logging.
 This library supports setting breakpoints within both interpretd function and jit compiled function.
 The breakpoint could be at any position within the function. The function could be global/local/module/ananymous.
 
+## Features
+
+* set breakpoint at any position
+* dynamic breakpoint
+* Customized breakpoint handler
+* you could define one-shot breakpoint
+* work for jit compiled function
+* if function reference specified, then performance impact is only bound to that function
+* if all breakpoints deleted, jit could recover
+
 ## API
 
 ### require("resty.inspect.dbg").set_hook(file, line, func, filter_func)
