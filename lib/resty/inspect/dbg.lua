@@ -79,7 +79,10 @@ function _M.set_hook(file, line, func, filter_func)
     local key = file .. "#" .. line
     table.insert(hooks, {key = key, filter_func = filter_func})
 
-    jit.flush(func)
+    if jit then
+        jit.flush(func)
+    end
+
     debug.sethook(hook, "l")
 end
 
