@@ -18,8 +18,10 @@ It works for luajit2.1 or lua5.1.
 * Customized breakpoint handler
 * you could define one-shot breakpoint
 * work for jit compiled function
-* if function reference specified, then performance impact is only bound to that function
+* if function reference specified, then performance impact is only bound to that function (*)
 * if all breakpoints deleted, jit could recover
+
+\* *JIT compiled codes will not trigger debug hook, so they would run fast even if hook is enabled*
 
 ## API
 
