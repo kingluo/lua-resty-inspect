@@ -9,6 +9,8 @@ on demand, i.e. dynamic logging.
 This library supports setting breakpoints within both interpretd function and jit compiled function.
 The breakpoint could be at any position within the function. The function could be global/local/module/ananymous.
 
+It works for luajit2.1 or lua5.1.
+
 ## Features
 
 * set breakpoint at any position
