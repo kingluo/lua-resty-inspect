@@ -1,9 +1,9 @@
 # lua-resty-inspect
 
-It's useful to set arbitrary breakpoint in any lua file to inspect the context infomation,
+It's useful to set arbitrary breakpoint in any lua file to inspect the context information,
 e.g. print local variables if some condition satisfied.
 
-In this way, you don't need to modify the source codes of your project, and just get diagnose infomation
+In this way, you don't need to modify the source code of your project, and just get diagnose information
 on demand, i.e. dynamic logging.
 
 This library supports setting breakpoints within both interpretd function and jit compiled function.
@@ -18,10 +18,12 @@ It works for luajit2.1 or lua5.1.
 * Customized breakpoint handler
 * you could define one-shot breakpoint
 * work for jit compiled function
-* if function reference specified, then performance impact is only bound to that function (*)
+* if function reference specified, then performance impact is only bound to that function (JIT compiled code will not trigger debug hook, so they would run fast even if hook is enabled)
 * if all breakpoints deleted, jit could recover
 
-\* *JIT compiled codes will not trigger debug hook, so they would run fast even if hook is enabled*
+## Operation Graph
+
+![1666250516596](https://user-images.githubusercontent.com/4401042/196885004-6cb73297-2c6e-4c5e-9748-9eac15e65736.png)
 
 ## API
 
@@ -118,7 +120,7 @@ http {
 
 ```
 
-### 2. example/resty_inspect_hook1.lua
+### 2. example/resty_inspect_hooks1.lua
 
 ```lua
 local dbg = require "resty.inspect.dbg"
@@ -140,7 +142,7 @@ end)
 
 ```
 
-### 3. example/resty_inspect_hook1.lua
+### 3. example/resty_inspect_hooks2.lua
 
 ```lua
 local dbg = require "resty.inspect.dbg"
@@ -201,7 +203,7 @@ ln -sf /opt/lua-resty-inspect/example/resty_inspect_hooks1.lua /opt/lua-resty-in
 curl localhost:10000/get
 
 ### breakpoint on foo() function triggered
-### print related infomation around the breakpoint
+### print related information around the breakpoint
 
 2022/08/28 21:44:28 [info] 2688226#2688226: *47 [lua] resty_inspect_hooks.lua:9: foo traceback
 stack traceback:
