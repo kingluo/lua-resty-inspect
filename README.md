@@ -23,7 +23,7 @@ It works for luajit2.1 or lua5.1.
 
 ## Operation Graph
 
-![1666250516596](https://user-images.githubusercontent.com/4401042/196885004-6cb73297-2c6e-4c5e-9748-9eac15e65736.png)
+![1666251376616](https://user-images.githubusercontent.com/4401042/196885851-d883a7fb-0ab5-45b1-987f-7b6d810748f5.png)
 
 ## API
 
