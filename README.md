@@ -11,6 +11,10 @@ The breakpoint could be at any position within the function. The function could 
 
 It works for luajit2.1 or lua5.1.
 
+This library has been used to implement inspect plugin of APISIX:
+
+https://apisix.apache.org/zh/docs/apisix/plugins/inspect/
+
 ## Features
 
 * set breakpoint at any position
@@ -60,6 +64,37 @@ to configure breakpoints on-the-fly. Delete that file would unset all breakpoint
 ### require("resty.inspect").destroy()
 
 Destroy the monitor timer.
+
+## Synopsis
+
+```lua
+# hooks.lua
+local dbg = require "apisix.inspect.dbg"
+
+dbg.set_hook("limit-req.lua", 88, require("apisix.plugins.limit-req").access,
+function(info)
+    ngx.log(ngx.INFO, debug.traceback("foo traceback", 3))
+    ngx.log(ngx.INFO, dbg.getname(info.finfo))
+    ngx.log(ngx.INFO, "conf_key=", info.vals.conf_key)
+    return true
+end)
+
+dbg.set_hook("t/lib/demo.lua", 31, require("t.lib.demo").hot2, function(info)
+    if info.vals.i == 222 then
+        ngx.timer.at(0, function(_, body)
+            local httpc = require("resty.http").new()
+            httpc:request_uri("http://127.0.0.1:9080/upstream1", {
+                method = "POST",
+                body = body,
+            })
+        end, ngx.var.request_uri .. "," .. info.vals.i)
+        return true
+    end
+    return false
+end)
+
+--- more breakpoints ...
+```
 
 ## Caveats
 
