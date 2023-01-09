@@ -69,7 +69,7 @@ Destroy the monitor timer.
 
 ```lua
 # hooks.lua
-local dbg = require "apisix.inspect.dbg"
+local dbg = require "resty.inspect.dbg"
 
 dbg.set_hook("limit-req.lua", 88, require("apisix.plugins.limit-req").access,
 function(info)
