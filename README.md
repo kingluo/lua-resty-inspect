@@ -118,6 +118,17 @@ dbg.set_hook("apisix/upstream.lua", 506, nil, function(info)
     end
     return false
 end)
+
+-- check when new route configuration get updated by data plane
+local cjson = require("cjson")
+dbg.set_hook("apisix/core/config_etcd.lua", 393, nil, function(info)
+    local filter_res = "/routes"
+    if info.vals.self.key:sub(-#filter_res) == filter_res and not info.vals.err then
+        ngx.log(ngx.WARN, "etcd watch /routes response: ", cjson.encode(info.vals.dir_res))
+        return true
+    end
+    return false
+end)
 ```
 
 **The breakpoint handler could be arbitrary lua code, so you could do anything there, not
