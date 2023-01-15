@@ -86,6 +86,7 @@ Destroy the monitor timer.
 # hooks.lua
 local dbg = require "resty.inspect.dbg"
 
+-- print stack backtrace and variable `conf_key`
 dbg.set_hook("limit-req.lua", 88, require("apisix.plugins.limit-req").access,
 function(info)
     ngx.log(ngx.INFO, debug.traceback("foo traceback", 3))
@@ -112,7 +113,7 @@ end)
 -- get worker id only if `sync_data` is one of the function callers
 dbg.set_hook("apisix/upstream.lua", 506, nil, function(info)
     if debug.traceback("demo traceback", 3):find("sync_data") then
-        core.log.warn("ngx.worker.id=", ngx.worker.id())
+        ngx.log(ngx.WARN, "ngx.worker.id=", ngx.worker.id())
         return true
     end
     return false
