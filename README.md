@@ -83,7 +83,7 @@ Destroy the monitor timer.
 ## Synopsis
 
 ```lua
-# hooks.lua
+-- example_hooks.lua
 local dbg = require "resty.inspect.dbg"
 
 -- print stack backtrace and variable `conf_key`
