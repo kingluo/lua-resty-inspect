@@ -6,6 +6,14 @@ e.g. print local variables if some condition satisfied.
 In this way, you don't need to modify the source code of your project, and just get diagnose information
 on demand, i.e. dynamic logging.
 
+**Why not modify the source code to debug?**
+
+* The production environment doesn't allow to modify the code, and you should not to.
+* bad code changes would pollute the business source code.
+* You need to reload nginx to make code changes take effect, which ruins the online business.
+* It's difficult to change code in container.
+* It's easy to forget rolling back the changes after debug. And it's hard to roll back completely.
+
 This library supports setting breakpoints within both interpretd function and jit compiled function.
 The breakpoint could be at any position within the function. The function could be global/local/module/ananymous.
 
@@ -15,8 +23,15 @@ This library has been used to implement inspect plugin of APISIX:
 
 https://apisix.apache.org/zh/docs/apisix/plugins/inspect/
 
+## Use cases
+
+* locate the issue source
+* print some masked logs
+* learn from huge source code via debugging
+
 ## Features
 
+* non-intrusive, bad code in the breakpint doesn't affect the business source code
 * set breakpoint at any position
 * dynamic breakpoint
 * Customized breakpoint handler
@@ -48,7 +63,7 @@ at ease.
 
 The `info` is a hash table which contains below keys:
 
-* `finfo`: `debug.getinfo(level, "nSlf")`
+* `finfo`: return value of `debug.getinfo(level, "nSlf")`
 * `uv`: upvalues hash table
 * `vals`: local variables hash table
 
@@ -79,6 +94,7 @@ function(info)
     return true
 end)
 
+-- send info to remote server if var `i` is 222
 dbg.set_hook("t/lib/demo.lua", 31, require("t.lib.demo").hot2, function(info)
     if info.vals.i == 222 then
         ngx.timer.at(0, function(_, body)
@@ -93,8 +109,24 @@ dbg.set_hook("t/lib/demo.lua", 31, require("t.lib.demo").hot2, function(info)
     return false
 end)
 
---- more breakpoints ...
+-- get worker id only if `sync_data` is one of the function callers
+dbg.set_hook("apisix/upstream.lua", 506, nil, function(info)
+    if debug.traceback("demo traceback", 3):find("sync_data") then
+        core.log.warn("ngx.worker.id=", ngx.worker.id())
+        return true
+    end
+    return false
+end)
 ```
+
+**The breakpoint handler could be arbitrary lua code, so you could do anything there, not
+just printing logs.**
+
+**But, note that async code, e.g. cosocket, should not run in the breakpoint directly,
+because the execution of the breakpint handler function is synchronous and blocking,
+and you have no chance to return to the nginx event loop until completion.**
+
+**Instead, you could use a timer to postpone the async code, just like what I did above.**
 
 ## Caveats
 
@@ -107,7 +139,7 @@ When the breakpoints are enabled, the lua vm could not trace new hot paths and c
 
 But when the breakpoints disappear, the lua vm would recover jit tracing.
 
-So this library is only useful for functional debug without stress.
+Conservatively, this library is mainly useful for functional debug without stress.
 
 ## Example
 
