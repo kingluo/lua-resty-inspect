@@ -14,7 +14,7 @@ function _M.getname(n)
     end
 end
 
-local function hook(evt, arg)
+local function hook(_, arg)
     local level = 2
     local finfo = debug.getinfo(level, "nSlf")
     local key = finfo.source .. "#" .. arg
@@ -67,6 +67,9 @@ local function hook(evt, arg)
         hooks = hooks2
         if #hooks == 0 then
             debug.sethook()
+            if jit then
+                jit.on()
+            end
         end
     end
 end
